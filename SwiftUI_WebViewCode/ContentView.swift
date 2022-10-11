@@ -48,30 +48,33 @@ extension ContentView {
     }
     
     var body: some View {
-        VStack {
-            CustomWebView(url: "https://www.naver.com")
-                .environmentObject(viewModel)
-            
-            bottomTabBar
-                .frame(height: bottomTabHegiht)
-                .offset(y: bottomTabOffsetY)
-        }
-        .onAppear {
-            viewModel
-                .isScrollUp
-                .compactMap { $0 }
-                .sink { isScrollUp in
-                    if isScrollUp {
-                        if 0 <= bottomTabOffsetY {
-                            bottomTabOffsetY -= 1
-                        }
-                    } else {
-                        if bottomTabOffsetY <= bottomTabHegiht {
-                            bottomTabOffsetY += 1
+        GeometryReader { geometryReader in
+            VStack {
+                CustomWebView(url: "https://www.naver.com")
+                    .environmentObject(viewModel)
+                    .frame(height: geometryReader.size.height - bottomTabHegiht + bottomTabOffsetY)
+                
+                bottomTabBar
+                    .frame(height: bottomTabHegiht)
+//                    .offset(y: bottomTabOffsetY)
+            }
+            .onAppear {
+                viewModel
+                    .isScrollUp
+                    .compactMap { $0 }
+                    .sink { isScrollUp in
+                        if isScrollUp {
+                            if 0 <= bottomTabOffsetY {
+                                bottomTabOffsetY -= 1
+                            }
+                        } else {
+                            if bottomTabOffsetY <= bottomTabHegiht + 30 {
+                                bottomTabOffsetY += 1
+                            }
                         }
                     }
-                }
-                .store(in: &viewModel.subscriptions)
+                    .store(in: &viewModel.subscriptions)
+            }
         }
     }
     
