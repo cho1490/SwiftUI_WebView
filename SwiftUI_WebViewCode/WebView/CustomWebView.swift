@@ -46,6 +46,38 @@ struct CustomWebView: UIViewRepresentable {
         
         init(_ myWebView: CustomWebView) {
             self.myWebView = myWebView
+            myWebView
+                .viewModel
+                .changedTabTypeSubject
+                .compactMap { $0 }
+                .sink { [self] tabType in
+                    if tabType == .BACK {
+                        if webView.canGoBack {
+                            webView.goBack()
+                        }
+                    }
+                    
+                    else if tabType == .FORWARD {
+                        if webView.canGoForward {
+                            webView.goForward()
+                        }
+                    }
+                    
+                    else if tabType == .HOME {
+                        if webView.canGoBack {
+                            webView.go(to: webView.backForwardList.backList.first!)
+                        } else {
+                            if let url = URL(string: myWebView.url) {
+                                webView.load(URLRequest(url: url))
+                            }
+                        }
+                    }
+                    
+                    else if tabType == .RELOAD {
+                        webView.reload()
+                    }
+                }
+                .store(in: &subscriptions)
         }
         
     }
@@ -59,38 +91,7 @@ extension CustomWebView.Coordinator: WKUIDelegate {
 extension CustomWebView.Coordinator: WKNavigationDelegate {
     
     func webView(_ webView: WKWebView, didStartProvisionalNavigation navigation: WKNavigation!) {
-        myWebView
-            .viewModel
-            .changedTabTypeSubject
-            .compactMap { $0 }
-            .sink { [self] tabType in
-                if tabType == .BACK {
-                    if webView.canGoBack {
-                        webView.goBack()
-                    }
-                }
-                
-                else if tabType == .FORWARD {
-                    if webView.canGoForward {
-                        webView.goForward()
-                    }
-                }
-                
-                else if tabType == .HOME {
-                    if webView.canGoBack {
-                        webView.go(to: webView.backForwardList.backList.first!)
-                    } else {
-                        if let url = URL(string: myWebView.url) {
-                            webView.load(URLRequest(url: url))
-                        }
-                    }
-                }
-                
-                else if tabType == .RELOAD {
-                    webView.reload()
-                }
-            }
-            .store(in: &subscriptions)
+        
     }
     
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
