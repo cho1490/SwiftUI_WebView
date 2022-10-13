@@ -50,7 +50,7 @@ struct CustomWebView: UIViewRepresentable {
                 .viewModel
                 .changedTabTypeSubject
                 .compactMap { $0 }
-                .sink { [self] tabType in
+                .sink { [self] tabType in 
                     if tabType == .BACK {
                         if webView.canGoBack {
                             webView.goBack()
